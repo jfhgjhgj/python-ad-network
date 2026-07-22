@@ -62,20 +62,10 @@ def admin_panel():
                 .stats {{ background-color: #e9ecef; padding: 15px; margin: 15px 0; border-radius: 6px; font-weight: bold; font-size: 18px; color: #333; text-align: center; }}
                 input {{ width: 100%; padding: 10px; margin: 8px 0 18px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }}
                 
-                /* تصميم منطقة السحب والإفلات Drag & Drop */
                 .drop-zone {{
-                    width: 100%;
-                    height: 120px;
-                    border: 2px dashed #007bff;
-                    border-radius: 6px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    cursor: pointer;
-                    background-color: #f8f9fa;
-                    margin: 8px 0 18px 0;
-                    transition: background 0.3s, border-color 0.3s;
+                    width: 100%; height: 120px; border: 2px dashed #007bff; border-radius: 6px;
+                    display: flex; align-items: center; justify-content: center; flex-direction: column;
+                    cursor: pointer; background-color: #f8f9fa; margin: 8px 0 18px 0; transition: background 0.3s, border-color 0.3s;
                 }}
                 .drop-zone--over {{ border-color: #28a745; background-color: #e8f5e9; }}
                 .drop-zone__input {{ display: none; }}
@@ -107,7 +97,6 @@ def admin_panel():
                         <span class="drop-zone__prompt">قم بسحب وإفلات صورة الإعلان هنا<br>أو اضغط لتصفح الملفات من جهازك</span>
                         <input type="file" name="ad_image" id="ad_image_input" class="drop-zone__input" accept="image/*">
                     </div>
-
                     <label><b>أو ضع رابط مباشر للصورة يدوياً (اختياري):</b></label>
                     <input type="text" name="image_url" id="image_url_input" value="{ad_database['image_url']}">
                     
@@ -117,59 +106,49 @@ def admin_panel():
                 <form action="/admin/reset" method="POST">
                     <button type="submit" class="reset-btn">تصفير عداد النقرات</button>
                 </form>
-
                 <div class="preview-box">
                     <b>الإعلان النشط حالياً:</b><br>
                     <img src="{ad_database['image_url']}" alt="Active Ad">
                 </div>
             </div>
-
             <script>
                 const dropZone = document.getElementById("ad_drop_zone");
                 const inputElement = document.getElementById("ad_image_input");
                 const urlInput = document.getElementById("image_url_input");
-
                 dropZone.addEventListener("click", () => inputElement.click());
-
                 inputElement.addEventListener("change", () => {{
                     if (inputElement.files.length) {{
                         updateThumbnail(dropZone, inputElement.files[0]);
-                        urlInput.value = ""; // مسح الرابط اليدوي عند اختيار ملف جديد
+                        urlInput.value = "";
                     }}
                 }});
-
                 dropZone.addEventListener("dragover", (e) => {{
                     e.preventDefault();
                     dropZone.classList.add("drop-zone--over");
                 }});
-
                 ["dragleave", "dragend"].forEach((type) => {{
                     dropZone.addEventListener(type, () => {{
                         dropZone.classList.remove("drop-zone--over");
                     }});
                 }});
-
                 dropZone.addEventListener("drop", (e) => {{
                     e.preventDefault();
                     if (e.dataTransfer.files.length) {{
                         inputElement.files = e.dataTransfer.files;
                         updateThumbnail(dropZone, e.dataTransfer.files[0]);
-                        urlInput.value = ""; // مسح الرابط اليدوي عند إسقاط ملف جديد
+                        urlInput.value = "";
                     }}
                     dropZone.classList.remove("drop-zone--over");
                 }});
-
                 function updateThumbnail(dropZoneElement, file) {{
                     let prompt = dropZoneElement.querySelector(".drop-zone__prompt");
                     if (prompt) prompt.remove();
-
                     let thumbnailElement = dropZoneElement.querySelector(".drop-zone__thumb");
                     if (!thumbnailElement) {{
                         thumbnailElement = document.createElement("div");
                         thumbnailElement.classList.add("drop-zone__thumb");
                         dropZoneElement.appendChild(thumbnailElement);
                     }}
-
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
                     reader.onload = () => {{
@@ -184,18 +163,16 @@ def admin_panel():
 
 @app.route('/admin/update', methods=['POST'])
 def update_ad():
-    """تحديث بيانات الإعلان سواءً عن طريق رفع ملف أو إدخال الرابط يدوياً"""
+    """تحديث بيانات الإعلان"""
     target_url = request.form.get("target_url")
     image_url = request.form.get("image_url")
     
-    # فحص إذا تم رفع ملف صورة عبر السحب والإفلات
     if 'ad_image' in request.files:
         file = request.files['ad_image']
         if file and file.filename != '':
             filename = file.filename
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
-            # توليد الرابط المباشر للملف المرفوع بناءً على رابط السيرفر الحالي
             image_url = f"{request.host_url}static/ads_images/{filename}"
 
     ad_database["target_url"] = target_url
@@ -212,7 +189,7 @@ def reset_clicks():
 
 @app.route('/get-ad', methods=['GET'])
 def get_ad():
-    """الرابط السحابي المباشر الذي تستدعيه اللعبة لتنزيل بيانات الإعلان"""
+    """الرابط السحابي المباشر الذي تستدعيه اللعبة"""
     return jsonify({
         "image_url": ad_database["image_url"],
         "target_url": ad_database["target_url"]
@@ -220,6 +197,12 @@ def get_ad():
 
 @app.route('/click', methods=['GET', 'POST'])
 def register_click():
+    """تحديث عداد النقرات"""
+    ad_database["clicks"] += 1
+    return jsonify({"status": "success", "total_clicks": ad_database["clicks"]})
+
+if __name__ == '__main__':
+    app.run(debug=True)
     """المسار الذي تخبر به اللعبة السيرفر بحدوث نقرة لتحديث العداد"""
     ad_database["clicks"] += 1
     return jsonify({"status": "success", "total_clicks": ad_database["clicks"]})
