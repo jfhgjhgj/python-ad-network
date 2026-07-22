@@ -1,27 +1,14 @@
-# 🚀 اصنع سيرفر الإعلانات الخاص بك للعبة Pygame مجاناً!
+🚀 استضف سيرفر إعلانات Pygame الخاص بك
+لاستخدام نظام الإعلانات هذا، تحتاج إلى إعداد لوحة التحكم الخاصة بك على منصة PythonAnywhere (مجاناً 100%).
 
-لكي تتمكن من استخدام مكتبة الإعلانات هذه داخل ألعابك، يجب عليك إنشاء لوحة تحكم وسيرفر خاص بك على منصة **PythonAnywhere** (مجاني 100% ويستغرق 5 دقائق فقط).
+🛠️ خطوات الإعداد خطوة بخطوة
+أنشئ حساباً مجانياً على موقع PythonAnywhere.
 
-هذا النظام يتيح لك التحكم الكامل في تغيير الإعلانات وحساب عدد النقرات سحابياً دون الحاجة لتحديث كود اللعبة أو إيقافها!
+اذهب إلى تبويب Web واضغط على Add a new web app.
 
----
+اختر Flask ثم حدد Python 3.10 (أو أحدث).
 
-## 🛠️ دليل الإعداد خطوة بخطوة
-
-### الخطوة 1: إنشاء حساب مجاني
-1. توجه إلى موقع [PythonAnywhere](https://www.pythonanywhere.com/).
-2. قم بإنشاء حساب مجاني جديد واختيار الخطة المجانية (Beginner Account).
-
-### الخطوة 2: إنشاء تطبيق ويب (Web App)
-1. بعد دخولك للوحة التحكم، اذهب إلى تبويب **Web** من القائمة العلوية.
-2. اضغط على الزر الأخضر **Add a new web app**.
-3. اختر إطار العمل **Flask**، ثم حدد إصدار بايثون **Python 3.10** (أو أحدث إصدار متاح).
-4. اترك المسار الافتراضي لملف السيرفر الرئيسي كما هو (غالباً يكون `/home/yourusername/mysite/flask_app.py`) واضغط على **Next**.
-
-### الخطوة 3: كتابة كود السيرفر ولائحة التحكم
-1. اذهب إلى تبويب **Files** من القائمة العلوية لحسابك في PythonAnywhere.
-2. ادخل إلى مجلد موقعك: `mysite/` ثم افتح ملف **`flask_app.py`**.
-3. امسح كل الأسطر الموجودة داخل الملف بالكامل، وألصق كود Flask المطور والآمن التالي:
+اذهب إلى تبويب Files، وافتح الملف mysite/flask_app.py وامسح كل ما فيه، ثم الصق كود سيرفر Flask التالي:
 
 ```python
 import os
@@ -50,11 +37,11 @@ def home():
 
 @app.route('/admin', methods=['GET'])
 def admin_panel():
-    """لوحة التحكم لتعديل الإعلان وعرض النقرات مع ميزة السحب والإفلات"""
+    """لوحة التحكم لتعديل الإعلان وعرض النقرات مع دعم ميزة السحب والإفلات"""
     html_content = f"""
     <html>
         <head>
-            <title>Ad Server Control Panel</title>
+            <title>لوحة التحكم بسيرفر الإعلانات</title>
             <style>
                 body {{ font-family: Arial, sans-serif; margin: 40px; text-align: center; background-color: #f4f4f9; direction: rtl; }}
                 .container {{ background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: inline-block; width: 80%; max-width: 500px; text-align: right; }}
@@ -85,7 +72,7 @@ def admin_panel():
         </head>
         <body>
             <div class="container">
-                <h2>📢 Pygame Ad Control Panel</h2>
+                <h2>📢 لوحة تحكم إعلانات Pygame</h2>
                 <div class="stats">🖱️ إجمالي النقرات على الإعلان: {ad_database['clicks']}</div>
                 
                 <form action="/admin/update" method="POST" enctype="multipart/form-data">
@@ -100,12 +87,13 @@ def admin_panel():
                     <label><b>أو ضع رابط مباشر للصورة يدوياً (اختياري):</b></label>
                     <input type="text" name="image_url" id="image_url_input" value="{ad_database['image_url']}">
                     
-                    <button type="submit">تحديث الإعلان فوراً</button>
+                    <button type="submit">تحديث الإعلان الآن</button>
                 </form>
                 
                 <form action="/admin/reset" method="POST">
                     <button type="submit" class="reset-btn">تصفير عداد النقرات</button>
                 </form>
+                
                 <div class="preview-box">
                     <b>الإعلان النشط حالياً:</b><br>
                     <img src="{ad_database['image_url']}" alt="Active Ad">
@@ -163,7 +151,7 @@ def admin_panel():
 
 @app.route('/admin/update', methods=['POST'])
 def update_ad():
-    """تحديث بيانات الإعلان"""
+    """تحديث بيانات الإعلان سواء عبر رفع ملف أو رابط مباشر"""
     target_url = request.form.get("target_url")
     image_url = request.form.get("image_url")
     
@@ -189,7 +177,7 @@ def reset_clicks():
 
 @app.route('/get-ad', methods=['GET'])
 def get_ad():
-    """الرابط السحابي المباشر الذي تستدعيه اللعبة"""
+    """الرابط السحابي المباشر الذي تستدعيه اللعبة لجلب تفاصيل الإعلان"""
     return jsonify({
         "image_url": ad_database["image_url"],
         "target_url": ad_database["target_url"]
@@ -197,13 +185,7 @@ def get_ad():
 
 @app.route('/click', methods=['GET', 'POST'])
 def register_click():
-    """تحديث عداد النقرات"""
-    ad_database["clicks"] += 1
-    return jsonify({"status": "success", "total_clicks": ad_database["clicks"]})
-
-if __name__ == '__main__':
-    app.run(debug=True)
-    """المسار الذي تخبر به اللعبة السيرفر بحدوث نقرة لتحديث العداد"""
+    """الرابط الذي تستدعيه اللعبة لإبلاغ السيرفر بحدث النقر"""
     ad_database["clicks"] += 1
     return jsonify({"status": "success", "total_clicks": ad_database["clicks"]})
 
