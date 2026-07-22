@@ -7,16 +7,19 @@ pygame.init()
 win = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("My Awesome Python Game with Ads")
 
-# وضع الرابط التوضيحي (يستبدله المطور برابط سيرفره الخاص)
-my_ad = GameAd("https://YOUR_USERNAME.pythonanywhere.com/get-ad", width=300, height=80)
+# ⚠️ Replace 'yourusername' with your actual PythonAnywhere username
+SERVER_URL = "https://yourusername.pythonanywhere.com/get-ad"
 
-# جلب الإعلان في الخلفية حتى لا تتجمد اللعبة
-threading.Thread(target=my_ad.fetch_ad, args=(250, 500), daemon=True).start()
+# Instantiate GameAd specifying position (x=250, y=500) and dimensions
+my_ad = GameAd(SERVER_URL, x=250, y=500, width=300, height=80)
+
+# Fetch ad asynchronously to prevent game freezing on startup
+threading.Thread(target=my_ad.fetch_ad, daemon=True).start()
 
 clock = pygame.time.Clock()
 
 while True:
-    win.fill((30, 30, 30)) # خلفية داكنة
+    win.fill((30, 30, 30))  # Dark background
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -26,6 +29,7 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             my_ad.check_click(pygame.mouse.get_pos())
             
+    # Render advertisement on screen
     my_ad.draw(win)
     
     pygame.display.update()
