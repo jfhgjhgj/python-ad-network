@@ -1,15 +1,33 @@
-# 🚀 Host Your Own Pygame Ad Server
+تفضل المجلد الشامل كاملاً بتنسيق Markdown؛ حيث تم دمج كود flask_app.py المطور بالكامل داخل خطوات الشرح باللغتين الإنجليزية والعربية ليصبح ملف README جاهزاً للنشر مباشرة على GitHub:
 
-To use this ad system, you need to set up your own control panel on **PythonAnywhere** (100% Free).
+📢 Pygame Ad Server & Client
+A free, lightweight, open-source ad server and client library designed for Pygame developers. Easily manage ads dynamically via a Flask admin panel on PythonAnywhere without updating your game code!
 
-## 🛠️ Step-by-Step Setup
+🇬🇧 Complete Setup Guide (English)
+This guide covers setting up your ad server on PythonAnywhere up to running the game client.
 
-1. Create a free account on [PythonAnywhere](https://www.pythonanywhere.com/).
-2. Go to the **Web** tab and click **Add a new web app**.
-3. Choose **Flask** and select **Python 3.10** (or newer).
-4. Go to the **Files** tab, open `mysite/flask_app.py`, delete everything, and paste this Flask Server Code:
+🛠️ Step 1: Set Up the Ad Server on PythonAnywhere
+Create an Account:
 
-```python
+Go to PythonAnywhere and create a free account (Beginner plan).
+
+Create a New Web App:
+
+Navigate to the Web tab from the top menu.
+
+Click Add a new web app.
+
+Select Flask framework, then choose Python 3.10 (or newer).
+
+Leave the default script path as is (/home/YOUR_USERNAME/mysite/flask_app.py) and click Next.
+
+Paste Server Code:
+
+Go to the Files tab and open mysite/flask_app.py.
+
+Delete all default code and paste the following full flask_app.py code:
+
+Python
 import os
 from flask import Flask, request, jsonify, render_template_string, redirect, url_for
 
@@ -189,3 +207,44 @@ def register_click():
 
 if __name__ == '__main__':
     app.run(debug=True)
+Configure Static Files Directory (Critical Step):
+
+Go back to the Web tab.
+
+Scroll down to the Static files section.
+
+Add a new entry:
+
+URL: /static/
+
+Directory: /home/YOUR_USERNAME/mysite/static/ (Replace YOUR_USERNAME with your actual PythonAnywhere username).
+
+Reload the App:
+
+Scroll back to the top of the Web tab and click the green Reload button.
+
+Your control panel is now live at https://YOUR_[USERNAME.pythonanywhere.com/admin](https://USERNAME.pythonanywhere.com/admin)!
+
+🎮 Step 2: Set Up & Run the Game Client
+Project Files Setup:
+
+Keep both ad_client.py and example.py in the same local directory on your machine.
+
+Connect Client to Your Server:
+
+Open example.py in your code editor.
+
+Update the SERVER_URL variable with your actual domain:
+
+Python
+SERVER_URL = "https://YOUR_USERNAME.pythonanywhere.com/get-ad"
+Run the Game:
+
+Install requirements:
+
+Bash
+pip install pygame requests
+Run the game:
+
+Bash
+python example.py
