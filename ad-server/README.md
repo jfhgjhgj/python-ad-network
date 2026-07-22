@@ -15,14 +15,14 @@ from flask import Flask, request, jsonify, render_template_string, redirect, url
 
 app = Flask(__name__)
 
-# Create a folder to save uploaded images so they are accessible to the game
+# Create a folder to save uploaded images making them accessible to the game
 UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'ads_images')
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# In-memory temporary database for the ad and click counter
+# In-memory database for the advertisement and click tracking
 ad_database = {
     "image_url": "https://placehold.co/300x80/png?text=Your+Ad+Here",
     "target_url": "https://github.com",
@@ -31,12 +31,12 @@ ad_database = {
 
 @app.route('/')
 def home():
-    """Automatically redirect to the control panel when visiting the root URL"""
+    """Redirect automatically to the admin panel when visiting the home page"""
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin', methods=['GET'])
 def admin_panel():
-    """Control panel to manage the ad and view clicks with Drag & Drop feature"""
+    """Control panel to update ads and view click metrics with drag & drop support"""
     html_content = f"""
     <html>
         <head>
@@ -48,20 +48,10 @@ def admin_panel():
                 .stats {{ background-color: #e9ecef; padding: 15px; margin: 15px 0; border-radius: 6px; font-weight: bold; font-size: 18px; color: #333; text-align: center; }}
                 input {{ width: 100%; padding: 10px; margin: 8px 0 18px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }}
                 
-                /* Drag & Drop Zone Styling */
                 .drop-zone {{
-                    width: 100%;
-                    height: 120px;
-                    border: 2px dashed #007bff;
-                    border-radius: 6px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    cursor: pointer;
-                    background-color: #f8f9fa;
-                    margin: 8px 0 18px 0;
-                    transition: background 0.3s, border-color 0.3s;
+                    width: 100%; height: 120px; border: 2px dashed #007bff; border-radius: 6px;
+                    display: flex; align-items: center; justify-content: center; flex-direction: column;
+                    cursor: pointer; background-color: #f8f9fa; margin: 8px 0 18px 0; transition: background 0.3s, border-color 0.3s;
                 }}
                 .drop-zone--over {{ border-color: #28a745; background-color: #e8f5e9; }}
                 .drop-zone__input {{ display: none; }}
@@ -88,12 +78,11 @@ def admin_panel():
                     <label><b>Target URL (Opened when player clicks the ad):</b></label>
                     <input type="url" name="target_url" value="{ad_database['target_url']}" required placeholder="https://example.com">
                     
-                    <label><b>Ad Image (Drag & Drop image here or click to select):</b></label>
+                    <label><b>Ad Image (Drag & drop here or click to browse):</b></label>
                     <div class="drop-zone" id="ad_drop_zone">
-                        <span class="drop-zone__prompt">Drag & drop ad image here<br>or click to browse files from your computer</span>
+                        <span class="drop-zone__prompt">Drag and drop ad image here<br>or click to browse from your device</span>
                         <input type="file" name="ad_image" id="ad_image_input" class="drop-zone__input" accept="image/*">
                     </div>
-
                     <label><b>Or enter a direct image URL manually (Optional):</b></label>
                     <input type="text" name="image_url" id="image_url_input" value="{ad_database['image_url']}">
                     
@@ -103,59 +92,49 @@ def admin_panel():
                 <form action="/admin/reset" method="POST">
                     <button type="submit" class="reset-btn">Reset Click Counter</button>
                 </form>
-
                 <div class="preview-box">
                     <b>Currently Active Ad:</b><br>
                     <img src="{ad_database['image_url']}" alt="Active Ad">
                 </div>
             </div>
-
             <script>
                 const dropZone = document.getElementById("ad_drop_zone");
                 const inputElement = document.getElementById("ad_image_input");
                 const urlInput = document.getElementById("image_url_input");
-
                 dropZone.addEventListener("click", () => inputElement.click());
-
                 inputElement.addEventListener("change", () => {{
                     if (inputElement.files.length) {{
                         updateThumbnail(dropZone, inputElement.files[0]);
-                        urlInput.value = ""; // Clear manual URL input when a new file is selected
+                        urlInput.value = "";
                     }}
                 }});
-
                 dropZone.addEventListener("dragover", (e) => {{
                     e.preventDefault();
                     dropZone.classList.add("drop-zone--over");
                 }});
-
                 ["dragleave", "dragend"].forEach((type) => {{
                     dropZone.addEventListener(type, () => {{
                         dropZone.classList.remove("drop-zone--over");
                     }});
                 }});
-
                 dropZone.addEventListener("drop", (e) => {{
                     e.preventDefault();
                     if (e.dataTransfer.files.length) {{
                         inputElement.files = e.dataTransfer.files;
                         updateThumbnail(dropZone, e.dataTransfer.files[0]);
-                        urlInput.value = ""; // Clear manual URL input when a new file is dropped
+                        urlInput.value = "";
                     }}
                     dropZone.classList.remove("drop-zone--over");
                 }});
-
                 function updateThumbnail(dropZoneElement, file) {{
                     let prompt = dropZoneElement.querySelector(".drop-zone__prompt");
                     if (prompt) prompt.remove();
-
                     let thumbnailElement = dropZoneElement.querySelector(".drop-zone__thumb");
                     if (!thumbnailElement) {{
                         thumbnailElement = document.createElement("div");
                         thumbnailElement.classList.add("drop-zone__thumb");
                         dropZoneElement.appendChild(thumbnailElement);
                     }}
-
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
                     reader.onload = () => {{
@@ -170,35 +149,33 @@ def admin_panel():
 
 @app.route('/admin/update', methods=['POST'])
 def update_ad():
-    """Update ad data either by uploading a file or entering a URL manually"""
+    """Update ad data whether via uploaded file or direct URL"""
     target_url = request.form.get("target_url")
     image_url = request.form.get("image_url")
     
-    # Check if an image file was uploaded via drag & drop
     if 'ad_image' in request.files:
         file = request.files['ad_image']
         if file and file.filename != '':
             filename = file.filename
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
-            # Generate direct URL for the uploaded file based on the current server host
             image_url = f"{request.host_url}static/ads_images/{filename}"
 
     ad_database["target_url"] = target_url
     if image_url:
         ad_database["image_url"] = image_url
         
-    return "<h3>Ad updated successfully! <a href='/admin'>Return to Control Panel</a></h3>"
+    return "<h3>Ad updated successfully! <a href='/admin'>Back to Control Panel</a></h3>"
 
 @app.route('/admin/reset', methods=['POST'])
 def reset_clicks():
-    """Reset the click counter to zero"""
+    """Reset click counter"""
     ad_database["clicks"] = 0
     return redirect(url_for('admin_panel'))
 
 @app.route('/get-ad', methods=['GET'])
 def get_ad():
-    """Direct cloud endpoint called by the game to fetch ad data"""
+    """Direct cloud endpoint called by the game to fetch ad details"""
     return jsonify({
         "image_url": ad_database["image_url"],
         "target_url": ad_database["target_url"]
@@ -206,7 +183,7 @@ def get_ad():
 
 @app.route('/click', methods=['GET', 'POST'])
 def register_click():
-    """Endpoint called by the game to notify the server of a click event"""
+    """Endpoint called by the game to notify server of a click event"""
     ad_database["clicks"] += 1
     return jsonify({"status": "success", "total_clicks": ad_database["clicks"]})
 
