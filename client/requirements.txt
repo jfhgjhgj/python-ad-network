@@ -1,3 +1,0 @@
-requests>=2.31
-# pygame>=2.5      # only if you use the pygame adapter (ad_client.py)
-# pillow>=10.0     # recommended for tkinter / turtle (adds JPG/WebP + resizing)
